@@ -8,7 +8,7 @@ import {
   SearchFormStyled,
   SearchFormButtonStyled,
   SearchFormButtonLabelStyled,
-  SearchFormInputStyled,
+  SearchFormInput,
 } from './Searchbar.styled';
 
 import { BiSearch } from 'react-icons/bi';
@@ -37,7 +37,7 @@ const Searchbar = ({ onSubmit }) => {
                 </SearchFormButtonLabelStyled>
               </SearchFormButtonStyled>
 
-              <SearchFormInputStyled
+              <SearchFormInput
                 className="input"
                 type="text"
                 autoComplete="off"
@@ -54,7 +54,7 @@ const Searchbar = ({ onSubmit }) => {
 };
 
 Searchbar.propTypes = {
-  onSubmit: PropTypes.func,
-}
+  onSubmit: PropTypes.func.isRequired,
+};
 
 export default Searchbar;

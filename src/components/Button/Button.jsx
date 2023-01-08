@@ -5,7 +5,7 @@ import { LoadMoreBtnStyled } from './Button.styled';
 
 const Button = ({onClick}) => {
     return (
-        <LoadMoreBtnStyled>
+        <LoadMoreBtnStyled type="button" onClick={onClick} hidden="hidden">
             Load More
         </LoadMoreBtnStyled>
     )
