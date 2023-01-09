@@ -3,7 +3,6 @@ import PropTypes from 'prop-types';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
-
 import {
   mashineStatus,
   GALLERY_SCROLL_TIMEOUT,
@@ -22,7 +21,6 @@ import Button from '../Button';
 import GlobalStyle from '../GlobalStyle';
 import AppStyled from './App.styled';
 
-
 export class App extends PureComponent {
   static propTypes = {
     searchString: PropTypes.string,
@@ -34,9 +32,6 @@ export class App extends PureComponent {
     searchData: [],
     firstImgUrlInFetch: '',
     status: mashineStatus.IDLE,
-    error: '',
-    loadMoreBtnVisibility: false,
-    modalIsOpen: false,
   };
 
   handleSerch = ({ query }) => {
@@ -63,7 +58,8 @@ export class App extends PureComponent {
 
   getImages = async () => {
     const { page, query } = this.state;
-
+    
+    
     this.setState({
       status: mashineStatus.LOADING,
     });
@@ -82,7 +78,7 @@ export class App extends PureComponent {
         });
         return;
       }
-
+      
       // Get url for the first image of new page
       const url = await hits[0].webformatURL;
 
@@ -95,7 +91,7 @@ export class App extends PureComponent {
           ? totalImages - imagesPerPage * page
           : 0;
 
-      // Making a Toast :)
+      // Making a Toast
       toast.info(`Total found: ${totalImages}. Images left: ${imagesLeft}.`);
 
       this.setState(({ searchData }) => ({
@@ -117,10 +113,9 @@ export class App extends PureComponent {
     // Reset state when have new query and getting images
     const { page, query: currentSearch } = this.state;
     const prevSearch = prevState.query;
-
+    console.log(1);
     if (prevSearch !== currentSearch) {
       this.setState({
-        query: currentSearch,
         page: 1,
         searchData: [],
       });
@@ -146,21 +141,19 @@ export class App extends PureComponent {
         <AppStyled>
           <Searchbar onSubmit={this.handleSerch} />
 
-          <ImageGallery searchData={searchData} />
-
           {status === mashineStatus.IDLE && (
             <IdleScreen>{message.IDLE}</IdleScreen>
           )}
 
-          {status === mashineStatus.LOADING && <Loader />}
+          {status === mashineStatus.LOADING && <Loader/>}
 
-          {/* Place for render ERROR container if it need */}
+          {status === mashineStatus.SUCCESSFULLY && <ImageGallery searchData={searchData} />}
+
+          {status === mashineStatus.SUCCESSFULLY && loadMoreBtnVisibility && 
+            <Button onClick={this.nextPage}/>
+          }
+
           {/* {status === mashineStatus.ERROR && <Modal>{error}</Modal>} */}
-
-          {status === mashineStatus.SUCCESSFULLY && loadMoreBtnVisibility && (
-            <Button onClick={this.nextPage} />
-          )}
-
           <ToastContainer />
         </AppStyled>
       </>

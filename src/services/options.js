@@ -1,7 +1,7 @@
 export const mashineStatus = {
     IDLE: 'idle',
     LOADING: 'loading',
-    SUCCESS: 'success',
+    SUCCESSFULLY: 'successfully',
     ERROR: 'error',
 };
 

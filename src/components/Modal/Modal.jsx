@@ -1,7 +1,6 @@
 import React, { PureComponent } from 'react';
 import { createPortal } from 'react-dom';
 import PropTypes from 'prop-types';
-
 import { OverlayStyled, ModalStyled } from './Modal.styled';
 
 const modalRoot = document.getElementById('modal-root');
@@ -9,6 +8,7 @@ const modalRoot = document.getElementById('modal-root');
 class Modal extends PureComponent {
   static propTypes = {
     children: PropTypes.node,
+    closeModal: PropTypes.func,
   };
 
   closeModal = e => {
