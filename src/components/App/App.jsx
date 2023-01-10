@@ -14,7 +14,7 @@ import { message } from '../../services/messages';
 
 import Searchbar from '../Searchbar';
 import ImageGallery from '../ImageGallery';
-import Loader from 'components/Loader';
+import Loader from '../Loader';
 import IdleScreen from '../IdleScreen';
 import Button from '../Button';
 
@@ -53,13 +53,12 @@ export class App extends PureComponent {
   };
 
   nextPage = () => {
-    this.setState(prevState => ({ page: prevState.page + 1 }));
+    this.setState(prevState => ({ page: (prevState.page += 1) }));
   };
 
   getImages = async () => {
     const { page, query } = this.state;
-    
-    
+
     this.setState({
       status: mashineStatus.LOADING,
     });
@@ -78,11 +77,9 @@ export class App extends PureComponent {
         });
         return;
       }
-      
-      // Get url for the first image of new page
+
       const url = await hits[0].webformatURL;
 
-      // Calculating Total images found and left images in base
       const imagesPerPage = ApiOptions.per_page;
       const totalImages = data.totalHits;
 
@@ -91,7 +88,6 @@ export class App extends PureComponent {
           ? totalImages - imagesPerPage * page
           : 0;
 
-      // Making a Toast
       toast.info(`Total found: ${totalImages}. Images left: ${imagesLeft}.`);
 
       this.setState(({ searchData }) => ({
@@ -110,26 +106,25 @@ export class App extends PureComponent {
   };
 
   async componentDidUpdate(_, prevState) {
-    // Reset state when have new query and getting images
     const { page, query: currentSearch } = this.state;
     const prevSearch = prevState.query;
-    console.log(1);
+
     if (prevSearch !== currentSearch) {
       this.setState({
         page: 1,
         searchData: [],
       });
-
       await this.getImages();
+      return;
     }
 
-    // Check state for changing page number
     if (prevState.page !== page) {
-      await this.getImages();
+      this.getImages();
 
-      // Scrolling next page func
       this.scrollNextPage();
+      return;
     }
+    console.log(`updated`);
   }
 
   render() {
@@ -145,15 +140,15 @@ export class App extends PureComponent {
             <IdleScreen>{message.IDLE}</IdleScreen>
           )}
 
-          {status === mashineStatus.LOADING && <Loader/>}
+          {status === mashineStatus.LOADING && <Loader />}
 
-          {status === mashineStatus.SUCCESSFULLY && <ImageGallery searchData={searchData} />}
+          {status === mashineStatus.SUCCESSFULLY && (
+            <ImageGallery searchData={searchData} />
+          )}
 
-          {status === mashineStatus.SUCCESSFULLY && loadMoreBtnVisibility && 
-            <Button onClick={this.nextPage}/>
-          }
-
-          {/* {status === mashineStatus.ERROR && <Modal>{error}</Modal>} */}
+          {status === mashineStatus.SUCCESSFULLY && loadMoreBtnVisibility && (
+            <Button onClick={this.nextPage} />
+          )}
           <ToastContainer />
         </AppStyled>
       </>
