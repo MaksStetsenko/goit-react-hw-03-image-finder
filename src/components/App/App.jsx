@@ -35,25 +35,19 @@ export class App extends PureComponent {
   };
 
   handleSerch = ({ query }) => {
-    this.setState({ query });
+    this.setState({ query, page: 1 });
   };
 
   scrollNextPage = () => {
     setTimeout(() => {
-      const { firstImgUrlInFetch } = this.state;
-      const url = firstImgUrlInFetch;
-      const firstImg = document.querySelector(`img[src="${url}"]`);
-
-      window.scroll({
-        behavior: 'smooth',
-        left: 0,
-        top: firstImg.offsetTop - 84,
-      });
-    }, GALLERY_SCROLL_TIMEOUT);
-  };
-
-  nextPage = () => {
-    this.setState(prevState => ({ page: (prevState.page += 1) }));
+      window.scroll(
+        {
+          behavior: 'smooth',
+          top: document.documentElement.scrollHeight,
+        }
+      )
+    },
+        GALLERY_SCROLL_TIMEOUT);
   };
 
   getImages = async () => {
@@ -67,8 +61,8 @@ export class App extends PureComponent {
       const data = await fetchData(query, page);
       const hits = await data.hits;
       const imagesInFetch = hits.length;
-
-      // NoImages found check
+      
+      //==========toast when nothing found=====================
       if (!imagesInFetch) {
         toast.info(`No images found!`);
         this.setState({
@@ -77,9 +71,8 @@ export class App extends PureComponent {
         });
         return;
       }
-
-      const url = await hits[0].webformatURL;
-
+      //========================================================
+      // ====================== Toast.info =====================
       const imagesPerPage = ApiOptions.per_page;
       const totalImages = data.totalHits;
 
@@ -89,42 +82,39 @@ export class App extends PureComponent {
           : 0;
 
       toast.info(`Total found: ${totalImages}. Images left: ${imagesLeft}.`);
-
-      this.setState(({ searchData }) => ({
-        searchData: [...searchData, ...hits],
-        firstImgUrlInFetch: url,
-        status: mashineStatus.SUCCESSFULLY,
-        loadMoreBtnVisibility: imagesInFetch >= imagesPerPage ? true : false,
-      }));
+      //==========================================================
+      const { searchData } = this.state;
+      const url = await hits[0].webformatURL;
+      
+        this.setState({
+          searchData: [...searchData, ...hits],
+          firstImgUrlInFetch: url,
+          status: mashineStatus.SUCCESSFULLY,
+          loadMoreBtnVisibility: imagesInFetch >= imagesPerPage ? true : false,
+          page: this.state.page + 1,
+        });this.scrollNextPage()
     } catch ({ code, message }) {
+      // =============== Toast when have error =================
       toast.error(`${code}: ${message}`);
       this.setState({
         status: mashineStatus.SUCCESSFULLY,
         error: `${code}: ${message}`,
       });
+      //==========================================================
     }
   };
 
-  async componentDidUpdate(_, prevState) {
-    const { page, query: currentSearch } = this.state;
+  componentDidUpdate(_, prevState) {
+    const { query: currentSearch } = this.state;
     const prevSearch = prevState.query;
 
     if (prevSearch !== currentSearch) {
       this.setState({
-        page: 1,
         searchData: [],
+        status: mashineStatus.IDLE,
       });
-      await this.getImages();
-      return;
-    }
-
-    if (prevState.page !== page) {
       this.getImages();
-
-      this.scrollNextPage();
-      return;
     }
-    console.log(`updated`);
   }
 
   render() {
@@ -142,12 +132,10 @@ export class App extends PureComponent {
 
           {status === mashineStatus.LOADING && <Loader />}
 
-          {status === mashineStatus.SUCCESSFULLY && (
-            <ImageGallery searchData={searchData} />
-          )}
+          <ImageGallery searchData={searchData} />
 
           {status === mashineStatus.SUCCESSFULLY && loadMoreBtnVisibility && (
-            <Button onClick={this.nextPage} />
+            <Button onClick={this.getImages} />
           )}
           <ToastContainer />
         </AppStyled>
